@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Voice Agent Test</title>
+    <script src="https://unpkg.com/@pipecat-ai/client-js@0.0.16/dist/index.umd.js"></script>
+</head>
+<body>
+    <h1>🎤 Voice Agent</h1>
+    <button id="start">Start Voice Chat</button>
+    <button id="stop">Stop Voice Chat</button>
+    <div id="status">Ready</div>
+
+    <script>
+        let client = null;
+        
+        document.getElementById('start').onclick = async () => {
+            try {
+                const response = await fetch('/connect', { method: 'POST' });
+                const { ws_url } = await response.json();
+                
+                client = new RTVIClient({
+                    transport: new DailyTransport(),
+                    params: {
+                        baseUrl: ws_url.replace('ws://', 'http://').replace('/ws', ''),
+                        endpoints: {
+                            connect: '/connect',
+                            action: '/action'
+                        }
+                    },
+                    enableMic: true,
+                    enableCam: false,
+                    callbacks: {
+                        onConnected: () => {
+                            document.getElementById('status').textContent = 'Connected';
+                            console.log('Voice client connected');
+                        },
+                        onDisconnected: () => {
+                            document.getElementById('status').textContent = 'Disconnected';
+                            console.log('Voice client disconnected');
+                        },
+                        onError: (error) => {
+                            console.error('Client error:', error);
+                            document.getElementById('status').textContent = 'Error: ' + error;
+                        }
+                    }
+                });
+                
+                await client.connect();
+                
+            } catch (error) {
+                console.error('Connection error:', error);
+                document.getElementById('status').textContent = 'Error: ' + error.message;
+            }
+        };
+        
+        document.getElementById('stop').onclick = async () => {
+            if (client) {
+                await client.disconnect();
+                client = null;
+            }
+            document.getElementById('status').textContent = 'Ready';
+        };
+    </script>
+</body>
+</html>

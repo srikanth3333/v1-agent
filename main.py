@@ -395,6 +395,16 @@ async def get_client():
     """)
 
 
+# Add this route to your existing main.py
+@app.get("/")
+async def health_check():
+    return {"status": "Voice Agent API running", "version": "1.0"}
+
+# Also add this explicit health endpoint
+@app.get("/health")
+async def health():
+    return {"status": "healthy", "service": "voice-agent"}
+
 if __name__ == "__main__":
     # Validate environment variables
     required_vars = ["OPENAI_API_KEY", "DEEPGRAM_API_KEY"]

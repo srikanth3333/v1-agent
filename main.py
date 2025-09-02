@@ -1,7 +1,6 @@
 #
 # Minimal Voice Agent for Web - Single File  
 # Uses: SmallWebRTC + Deepgram STT/TTS + OpenAI ChatGPT
-#
 import os
 import asyncio
 import uvicorn
@@ -13,17 +12,21 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse
 from loguru import logger
 
-from pipecat.audio.vad.silero import SileroVADAnalyzer
 from pipecat.frames.frames import LLMRunFrame
 from pipecat.pipeline.pipeline import Pipeline
 from pipecat.pipeline.runner import PipelineRunner
 from pipecat.pipeline.task import PipelineParams, PipelineTask
 from pipecat.processors.aggregators.openai_llm_context import OpenAILLMContext
-from pipecat.services.openai import OpenAILLMService
-from pipecat.services.deepgram import DeepgramSTTService, DeepgramTTSService
+
+# Updated imports to avoid deprecation warnings
+from pipecat.services.openai.llm import OpenAILLMService
+from pipecat.services.deepgram.stt import DeepgramSTTService
+from pipecat.services.deepgram.tts import DeepgramTTSService
+
 from pipecat.transports.base_transport import TransportParams
 from pipecat.transports.network.small_webrtc import SmallWebRTCTransport
 from pipecat.transports.network.webrtc_connection import IceServer, SmallWebRTCConnection
+# from pipecat.audio.vad.webrtc import WebRTCVADAnalyzer
 
 # Load environment variables
 load_dotenv(override=True)
@@ -52,7 +55,8 @@ async def run_bot(webrtc_connection):
         params=TransportParams(
             audio_in_enabled=True,
             audio_out_enabled=True,
-            vad_analyzer=SileroVADAnalyzer(),
+            # vad_analyzer=SileroVADAnalyzer(),
+            # vad_analyzer=WebRTCVADAnalyzer(),
         ),
     )
 
